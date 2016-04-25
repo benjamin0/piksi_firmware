@@ -226,7 +226,7 @@ static void output_baseline(u8 num_sdiffs, const sdiff_t *sdiffs,
     // ret = baseline(num_sdiffs, sdiffs, position_solution.pos_ecef,
     //                &amb_state.float_ambs, &num_used, b,
     //                disable_raim, DEFAULT_RAIM_THRESHOLD);
-    ret = get_baseline(b);
+    ret = get_baseline(b, &num_used);
     chMtxUnlock();
     if (ret == 1)
       log_warn("output_baseline: Float baseline RAIM repair");
