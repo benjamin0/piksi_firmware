@@ -153,7 +153,7 @@ double calc_heading(const double b_ned[3])
  * \param flags u8 RTK solution flags. 1 if float, 0 if fixed
  */
 void solution_send_baseline(const gps_time_t *t, u8 n_sats, double b_ecef[3],
-                            double ref_ecef[3], u8 flags, double hdop, 
+                            double ref_ecef[3], u8 flags, double hdop,
                             double corrections_age, u16 sender_id)
 {
   double* base_station_pos;
@@ -240,7 +240,7 @@ static void output_baseline(u8 num_sdiffs, const sdiff_t *sdiffs,
     // ret = baseline(num_sdiffs, sdiffs, position_solution.pos_ecef,
     //                &amb_state.float_ambs, &num_used, b,
     //                disable_raim, DEFAULT_RAIM_THRESHOLD);
-    ret = get_baseline(b, &num_used);
+    ret = get_baseline(b, &num_used, &flags);
     chMtxUnlock(&amb_state_lock);
     if (ret == 1)
       log_warn("output_baseline: Float baseline RAIM repair");
@@ -518,7 +518,7 @@ static void solution_thread(void *arg)
                                     sdiffs);
             ephemeris_unlock();
             if (num_sdiffs >= 4) {
-              output_baseline(num_sdiffs, sdiffs, &position_solution.time, pdt, 
+              output_baseline(num_sdiffs, sdiffs, &position_solution.time, pdt,
                               dops.hdop, base_obss.sender_id);
             }
           }
@@ -637,7 +637,7 @@ void process_matched_obs(u8 n_sds, gps_time_t *t, sdiff_t *sds, u16 base_id)
     if (n_sds > 4) {
       /* Initialize filters. */
       log_info("Initializing DGNSS filters");
-      dgnss_init(n_sds, sds, position_solution.pos_ecef);
+      dgnss_init_v3(n_sds, sds, position_solution.pos_ecef);
       /* Initialize ambiguity states. */
       ambiguities_init(&amb_state.fixed_ambs);
       ambiguities_init(&amb_state.float_ambs);
@@ -649,7 +649,7 @@ void process_matched_obs(u8 n_sds, gps_time_t *t, sdiff_t *sds, u16 base_id)
       reset_iar = false;
     }
     /* Update filters. */
-    dgnss_update(n_sds, sds, position_solution.pos_ecef,
+    dgnss_update_v3(n_sds, sds, position_solution.pos_ecef,
                  disable_raim, DEFAULT_RAIM_THRESHOLD);
     /* Update ambiguity states. */
     chMtxLock(&amb_state_lock);
